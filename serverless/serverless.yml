@@ -1,0 +1,35 @@
+service: transcribe
+
+package:
+  exclude:
+    - '*.json'
+    - '*.mp3'
+    - '*.txt'
+provider:
+  name: aws
+  runtime: python3.6
+  timeout: 30
+  versionFunctions: false
+  region: ap-southeast-1
+  memorySize: 128
+  tags:
+    Project: transcribe
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: 
+        - arn:aws:s3:::${self:custom.bucketName}/*
+    - Effect: Allow
+      Action:
+        - transcribe:StartTranscriptionJob
+      Resource: '*'
+custom:
+  bucketName: elysiumlabstest-sg 
+functions:
+  transcribe:
+    handler: transcribe.main
+    environment:
+      bucketName: ${self:custom.bucketName}
+  parse:
+    handler: parse.main
